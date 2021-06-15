@@ -1,0 +1,95 @@
+간단하지만 자주 사용 가능한 패럴랙스 효과 공부 by 마우스 모션, 스크롤 이벤트
+
+가능한 바닐라 JS 사용
+
+패럴랙스 스크롤링(Parallax Scrolling) : 스크롤에 따라 오브젝트와 배경이미지가 시간차를 두고 변하는 기법
+
+>> 무거운 플래시가 아닌 HTML, CSS
+
+>> 탐색 간편함, 입체감 등 제공하며 콘텐츠와의 상호작용, 흥미를 상승
+
+
+==================================================================================================
+
+1. 마우스 제어 (Web Interactive에서 매우 중요한 요소)
+
+>> 마우스 위치에 따라 오브젝트 제어 (모바일의 경우는 자이로 센서 등 사용)
+
+>> 근데 transform과 tranlate를 이용해도 마우스 커서 프레임이 부자연스러움이 있음 : 자연스러움을 위해 화려한 Animation이나 3D에는 다음과 같은 방법 사용
+   window.requestAnimationFrame(loop);
+   >> 말그대로 위 함수가 들어간 함수를 무한루프를 돌림
+   >> 거의 쓰진 않으나 모션을 줄 때 쓰게 됨
+
+==================================================================================================
+
+window.requestAnimationFrame()  : 최소 정밀도 는 1밀리세컨 / 브라우저에 수행하려는 애니메이션을 알리고 다음 리페인트 이전 애니메이션을 업데이트 함
+                                                            >>브라우저가 랜더링하면서 애니메이션을 만들어내는것이기에 이를 최적화하는거
+                                : 컴퓨터에따라 유동적이나 보통 60프레임 >> 애니메이션 최적화로 부드럽게함
+                                : 애니메이션 다음 프레임을 불러오려면 콜백함수가 requestAnimationFrame()를 반환해야한다.
+                                : 재귀형식으로 사용된다는 건데 다음과 같음 >> 부하가 걸리므로 여러 방안이 필요함 (특정 동작에 중단시킨다거나)
+
+                                function loop() {
+                                    console.log(i++); 
+                                    window.requestAnimationFrame(loop); // requestAnimationFrame으로 다시 loop를 부르잖
+                                }
+
+                                https://www.youtube.com/watch?v=9XnqDSabFjM
+
+                                : setInteval 대비 프레임 유실 방지, 모바일 배터리 절약
+
+
+>> 부드러운 움직임을 위해 세팅하는 공식 (코드 참조)
+
+let x = 0;
+let mx = 0;
+let speed = 0.001;(임의로)
+
+x = e.clientX;
+mx += (x -mx) * speed;
+
+>> 움직일 값 = 움직일 값 + (현재 커서위치 - 바로 전 위치값) * 속도; 
+
+>> 예를 들어 현재위치 100 마우스 커서위치 150이라 50만큼 이동해야 할때,
+   부드러운 움직임을 주기 위해서 움직여야할 값을 실제 움직여야할 값에 따라 조금씩 늘어나도록 더해줌으로서 (따라서 목적지에 다가갈 수록 줄어듦) 점점 감속시키게 함
+
+   100 += (150 - 100) * 0.001부터 하면 101, 102, 103, ... , 150 >> 이동할 거리 49, 48, 47, 점점 변화한다. 만약 속도가 커지면 변화간격이 줄어든다고 생각
+
+
+==================================================================================================
+
+>> 위와 같이 mousemove와 같이 transform: translate의 값 처리 + requestAnimationForm()로 자바스크립트를 이용하는 것 이외에도
+
+   css의 transition을 줘버려 처리할 수도 있음
+
+   http://tcpschool.com/css/css3_transform_transition
+
+   transition 속성을 좀 자세히 가면
+   transition : all 1s ease(가속도) >> 적용속성(css) / 시간 / timing function(효과의 시간당 속성 >> 가속도를 어떻게 붙일지) 임
+
+   ease속성 종료
+   ease(default) : 천천히 시작해 빨라지다 다시 느려짐
+   ease-in : 천천히 시작
+   ease-out : 천천히 끝남
+   ease-in-out : 천천히 시작되다 천천히 끝남
+   cubic-bezier(n,n,n,n) : 사용자가 정의한 함수에 따라 진행
+
+   https://matthewlein.com/tools/ceaser << 이 사이트에서 cubic-bezier(n,n,n,n)를 미리 볼 수 있음
+
+>> transition은 주의점은 이벤트 클래스(.~:hover)가 아닌 / 이벤트가 일어나는 바탕(.~)이 되는 클래스에 적용해야함
+==================================================================================================
+
+오늘 다시 공부한 것
+
+window.onload >> 화면 로드가 완료된 뒤에 실행시킬 경우 지정을 해주면 좋다.
+
+.innerHTML : elements의 HTML, XML을 가져옴 >>  HTML 요소 자체 수정을 이걸로 할 수 있음
+.innerText : elements의 text값들만 가져옴 >> 태그 내부 문자열 수정을 할 때 / HTML 요소 자체 수정을 이걸로 하면 그냥 태그 안의 텍스트로 들어가버린다
+
+- event
+mousemove | MouseEvent.clientX, MouseEvent.clientY (근데 이건 그냥 로그로 object 찍어만봐도...)
+
+- animation
+코딩애플에서 했던거처럼 JS를 사용해도 CSS를 trnasform과 translate를 변경하는 사용법이 랜더링이 스무스함
+
+- .getElementsBy TagName이나 ClassName 등은 배열로 넘어오니 [index] 주의! + 얘들은 셀렉터 기호 안넣음
+  vs querySelector() 나 querySelectorAll은 셀렉터 기호까지
